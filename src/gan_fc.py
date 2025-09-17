@@ -5,7 +5,7 @@ Initial coding: 2025-07-14
 import torch
 import torch.nn as nn
 
-from src.utils import Maxout, EPSILON
+from src.utils import Maxout
 
 
 class Generator(nn.Module):
@@ -21,7 +21,7 @@ class Generator(nn.Module):
             input_dim: int=100, 
             hidden_dim: int=1200, 
             output_dim: int=784,
-            uniform_init: tuple[float, float] = (-0.005, 0.005)
+            uniform_init: tuple[float, float] = (-0.05, 0.05)
         ) -> None:
         super().__init__()
         self.uniform_init = uniform_init
@@ -50,6 +50,8 @@ class Discriminator(nn.Module):
     """
     Implementation of the MNIST-Discriminator from the original GAN paper.
 
+    NOTE: Outputs are raw logits.
+
     Reference:
     Generative Adversarial Networks, Goodfellow et al. 2014
     https://arxiv.org/abs/1406.2661
@@ -72,11 +74,11 @@ class Discriminator(nn.Module):
             Maxout(hidden_dim, hidden_dim, num_pieces),
             nn.Dropout(hidden_p),
             nn.Linear(hidden_dim, 1), 
-            nn.Sigmoid()
         )
         self._initialize_weights()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Output are raw logits.""" 
         return self.net(x)
 
     def _initialize_weights(self) -> None:

@@ -6,10 +6,6 @@ import torch
 import torch.nn as nn
 
 
-# magic number to avoid log(0) :D
-EPSILON = 1e-7
-
-
 class Maxout(nn.Module):
     """
     Implementation of a maxout hidden layer.

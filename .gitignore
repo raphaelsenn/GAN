@@ -209,5 +209,5 @@ __marimo__/
 # Ignore data
 MNIST
 mnist_fake
-celeba
-celeb_faces_fake
+FASHION_MNIST
+fashion_mnist_fake

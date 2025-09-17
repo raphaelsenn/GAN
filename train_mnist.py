@@ -5,11 +5,12 @@ Initial coding: 2025-07-14
 import torch
 import torch.nn as nn
 from torch.optim import Optimizer
-from torch.utils.data import DataLoader, Subset
+from torch.utils.data import DataLoader
 
 from torchvision.transforms import transforms
+from torchvision.datasets import MNIST
 
-from src.gan_celebfaces import (
+from src.gan_fc import (
     Generator,
     Discriminator,
 )
@@ -18,9 +19,6 @@ from src.objective import (
     GeneratorLoss,
     DiscriminatorLoss
 )
-
-from src.dataset import CelebFaces
-
 
 def train(
         generator: nn.Module,
@@ -69,7 +67,7 @@ def train(
 
         if verbose: 
             print(
-                f"epoch: {epoch}\t"
+                f"epoch: {epoch}\t" 
                 f"generator loss: {(total_loss_g/N_samples):.4f}\t"
                 f"discriminator loss: {(total_loss_d/N_samples):.4f}"
             )
@@ -78,31 +76,23 @@ def train(
 if __name__ == "__main__":
     # --- Settings and Hyperparameters ---
     DIM_NOISE = 100
-    SUBSET_SIZE_DATASET = 60000
     DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     VERBOSE = True
     EPOCHS = 100
-    BATCH_SIZE = 100
+    BATCH_SIZE = 128
     SHUFFLE = True
-    LR_G = 0.0002
-    LR_D = 0.0002
+    LR_G = 0.002
+    LR_D = 0.002
     BETAS_G = (0.5, 0.99)
     BETAS_D = (0.5, 0.99) 
-    ROOT_DIR_CELEBFACES = "./celaba"
-    DATA_FOLDER = "data"
-    LANDMARS_FILE = "landmarks.csv"
+    ROOT_DIR_MNIST = "./MNIST"
 
     # --- Loading the Dataset ---
     transform = transforms.Compose([
-        transforms.Grayscale(1),
-        transforms.Resize(size=(96, 96)),
-        transforms.CenterCrop(size=(48, 48)),
         transforms.ToTensor(),
         transforms.Lambda(lambda x: x.view(-1))
     ])
-    idx = torch.randperm(SUBSET_SIZE_DATASET)
-    dataset = CelebFaces(ROOT_DIR_CELEBFACES, DATA_FOLDER, LANDMARS_FILE, transform)
-    dataset = Subset(dataset, idx)
+    dataset = MNIST(ROOT_DIR_MNIST, train=True, download=True, transform=transform)
     dataloader = DataLoader(dataset, BATCH_SIZE, SHUFFLE)
 
     # --- Create generator and discriminator ---
@@ -120,5 +110,5 @@ if __name__ == "__main__":
         dataloader, EPOCHS, DEVICE, VERBOSE     
     )
     # --- Save trained models ---
-    torch.save(generator.state_dict(), 'generator_celebfaces.pth')
-    torch.save(generator.state_dict(), 'discriminator_celebfaces.pth')
+    torch.save(generator.state_dict(), "generator_mnist.pth")
+    torch.save(generator.state_dict(), "discriminator_mnist.pth")
