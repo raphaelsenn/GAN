@@ -45,8 +45,11 @@ def train(
             z = torch.rand(size=(x.shape[0], DIM_NOISE), device=device) * 2 - 1
 
             # --- Train Discriminator ---
+            with torch.no_grad():
+                G_z = generator(z) 
+            
             D_x = discriminator(x)
-            D_G_z = discriminator(generator(z))
+            D_G_z = discriminator(G_z)
             optimizer_d.zero_grad()
             loss_d = criterion_d(D_x, D_G_z)
             loss_d.backward()
